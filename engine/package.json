@@ -1,0 +1,27 @@
+{
+  "name": "engine",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "npm run play:demo",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "parse:sample": "node --experimental-strip-types src/run-sample.ts",
+    "compile:sample": "node --experimental-strip-types src/compile-sample.ts",
+    "play:demo": "node --experimental-strip-types src/play.ts stories/demo.vns",
+    "play:sample": "node --experimental-strip-types src/play.ts stories/sample.vns"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}

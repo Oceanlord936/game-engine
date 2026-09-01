@@ -1,0 +1,149 @@
+// A longer branching story, built specifically to stress-test the engine:
+// three tracked variables, a secret only reachable through one path, an
+// else-if "elif chain", a compound && gate, an || in a ternary, both
+// choice forms, a handoff to external TypeScript (rock-paper-scissors,
+// inside a choice option), and three distinct endings chosen by a router
+// label that reads final accumulated state — now including a random
+// swing from the rock-paper-scissors result.
+//
+// Reachability (for manual testing — try to hit all three):
+//   ending_friend   — ask about the door, then walk her home
+//                     (or win rock-paper-scissors, trust-dependent)
+//   ending_mystery  — ask about the door, then head home alone
+//                     (or play rock-paper-scissors and not win big enough)
+//   ending_distant  — compliment her, or say nothing, at the start
+//
+// afternoon_walk's "rock-paper-scissors" option (label afternoon_walk)
+// is the engine's handoff seam in action: rps(alice); suspends the story,
+// src/play.ts's handoffHandlers.rps picks both sides at random and
+// resolves with rps_result/rps_player_choice/rps_opponent_choice, and the
+// story reacts to whatever it gets back — same mechanism a real battle
+// system would use later, just with much simpler rules.
+
+label morning {
+  trust = 0;
+  curiosity = 0;
+  secret_found = 0;
+
+  The morning sun cuts through the classroom windows.
+  Alice: You're early today.
+
+  choice {
+    "Compliment her" {
+      Alice: ...Oh. Thank you.
+      trust += 2;
+    }
+    "Ask about the locked door in the library" {
+      Alice: Why do you want to know that?
+      You: You always look at it. I figured it mattered.
+      Alice: ...Huh. Nobody's said that before.
+      curiosity += 3;
+      trust += 3;
+    }
+    "Say nothing" -> morning_silent;
+  }
+
+  jump(afternoon);
+}
+
+label morning_silent {
+  Alice: ...Fine. Be that way, then.
+  trust -= 1;
+  jump(afternoon);
+}
+
+label afternoon {
+  // Both curious enough to ask AND trusted enough to be shown — a single
+  // compound gate instead of two nested ifs.
+  if (curiosity > 1 && trust > 2) {
+    You: So, about that door...
+    Alice: Fine, I'll show you. Follow me.
+    jump(library_secret);
+  }
+
+  jump(afternoon_walk);
+}
+
+label library_secret {
+  The door creaks open onto a room full of old photographs.
+  Alice: Nobody else knows about this place.
+  secret_found = 1;
+  trust += 1;
+  jump(afternoon_walk);
+}
+
+label afternoon_walk {
+  choice {
+    "Offer to walk her home" -> walk_home;
+    "Head home alone" {
+      Alone, the walk feels longer than usual.
+    }
+    "Challenge her to rock-paper-scissors" {
+      Alice: Bored already? Fine — rock, paper, scissors. Best of one.
+      rps(alice);
+      You threw ${rps_player_choice}. Alice threw ${rps_opponent_choice}.
+      if (rps_result == "win") {
+        Alice: ...Lucky.
+        trust += 2;
+      } else if (rps_result == "lose") {
+        Alice: Ha! Told you.
+        trust -= 1;
+      } else {
+        Alice: A tie? Boring. Rematch later.
+      }
+    }
+  }
+
+  jump(evening);
+}
+
+label walk_home {
+  Alice: You really don't have to.
+  You: I want to.
+  trust += 1;
+  jump(evening);
+}
+
+label evening {
+  if (secret_found == 1) {
+    Alice: Thank you. For earlier.
+    trust += 1;
+  } else {
+    The evening passes quietly, uneventfully.
+  }
+
+  jump(ending_router);
+}
+
+label ending_router {
+  if (trust > 5) {
+    jump(ending_friend);
+  } else if (secret_found == 1) {
+    jump(ending_mystery);
+  } else {
+    jump(ending_distant);
+  }
+}
+
+label ending_friend {
+  Alice: I'm glad you stayed today.
+  jump(the_end);
+}
+
+label ending_mystery {
+  Alice: Keep the door between us, okay?
+  jump(the_end);
+}
+
+label ending_distant {
+  Alice: See you around, I guess.
+  jump(the_end);
+}
+
+label the_end {
+  The story settles here, for now.
+  Final trust score: ${trust}
+  Final curiosity score: ${curiosity}
+  Secret discovered: ${secret_found == 1 ? "yes" : "no"}
+  Alice: ${trust > 5 || secret_found == 1 ? "This was worth it." : "Well, that happened."}
+}

@@ -1,0 +1,9 @@
+# Dependencies
+node_modules/
+
+# Runtime save files (player-specific, not source)
+saves/
+
+# Local Claude Code tooling — not project source
+.claude/
+memory-backup/

@@ -1,0 +1,33 @@
+// comments look like real code now
+label chapter1_start {
+  The rain hadn't stopped in three days.
+  Alice: You're late again, ${trust > 3 ? "old friend" : "stranger"}.
+  You: Traffic. What did I miss?
+
+  trust += 1;
+
+  if (trust > 3) {
+    Alice: Nothing much, actually.
+    bg(sunny_street);
+  } else {
+    Alice: Everything, apparently.
+    bg(rainy_street);
+  }
+
+  show(alice, neutral);
+
+  choice {
+    "Apologize" {
+      Alice: ...I guess that's fine.
+      trust += 1;
+    }
+    "Deflect" -> deflect_branch;
+  }
+
+  jump(chapter1_start);
+}
+
+label deflect_branch {
+  Alice: Typical.
+  jump(chapter1_start);
+}
